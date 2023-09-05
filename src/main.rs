@@ -3,6 +3,7 @@ use std::io::Read;
 use std::path::Path;
 
 mod models;
+mod db;
 
 fn main() {
     let mut file = File::open(Path::new("data/db.json")).unwrap();
