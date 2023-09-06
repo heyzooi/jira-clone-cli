@@ -1,12 +1,38 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 use anyhow::{anyhow, Result};
 use serde::{Serialize, Deserialize};
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Action {
+    NavigateToEpicDetail { epic_id: u32 },
+    NavigateToStoryDetail { epic_id: u32, story_id: u32 },
+    NavigateToPreviousPage,
+    CreateEpic,
+    UpdateEpicStatus { epic_id: u32 },
+    DeleteEpic { epic_id: u32 },
+    CreateStory { epic_id: u32 },
+    UpdateStoryStatus { story_id: u32 },
+    DeleteStory { epic_id: u32, story_id: u32 },
+    Exit,
+}
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum Status {
     Open,
     InProgress,
+    Resolved,
     Closed,
+}
+
+impl Display for Status {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Status::Open       => write!(f, "Open"),
+            Status::InProgress => write!(f, "In Progress"),
+            Status::Resolved   => write!(f, "Resolved"),
+            Status::Closed     => write!(f, "Closed"),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -111,5 +137,13 @@ impl DBState {
         let story = self.stories.get_mut(story_id).ok_or(anyhow!("Story {story_id} not found"))?;
         story.status = status;
         Ok(story)
+    }
+
+    pub fn get_story_by_id(&self, story_id: &u32) -> Result<&Story> {
+        self.stories.get(story_id).ok_or(anyhow!("Story {story_id} not found"))
+    }
+
+    pub fn get_epic_by_id(&self, epic_id: &u32) -> Result<&Epic> {
+        self.epics.get(epic_id).ok_or(anyhow!("Epic {epic_id} not found"))
     }
 }
