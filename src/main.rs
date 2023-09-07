@@ -3,6 +3,7 @@ use std::rc::Rc;
 mod models;
 mod db;
 mod ui;
+mod io_utils;
 
 use anyhow::Error;
 use ui::EpicDetail;
