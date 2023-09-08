@@ -79,13 +79,6 @@ pub struct DBState {
 }
 
 impl DBState {
-    fn new() -> Self {
-        DBState {
-            last_item_id: 0,
-            epics: HashMap::new(),
-            stories: HashMap::new(),
-        }
-    }
 
     fn next_id(&self) -> u32 {
         self.last_item_id + 1

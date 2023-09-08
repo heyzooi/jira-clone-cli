@@ -56,6 +56,7 @@ impl Navigator {
                 let prompt = &self.prompts.delete_epic;
                 if prompt() {
                     self.db.delete_epic(epic_id)?;
+                    self.pages.pop();
                 }
             }
             Action::CreateStory { epic_id } => {
@@ -72,6 +73,7 @@ impl Navigator {
                 let prompt = &self.prompts.delete_story;
                 if prompt() {
                     self.db.delete_story(epic_id, story_id)?;
+                    self.pages.pop();
                 }
             }
             Action::Exit => {

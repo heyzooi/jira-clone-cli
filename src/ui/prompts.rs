@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use crate::{models::{Epic, Story, Status}, io_utils::get_user_input};
 
 pub struct Prompts {
@@ -48,14 +50,15 @@ fn delete_epic_prompt() -> bool {
     println!("----------------------------");
     println!("Are you sure you want to delete this epic? All stories in this epic will also be deleted [Y/n]:");
     let delete = get_user_input();
-    "Yy".contains(&delete.trim())
+    "Yy".contains(delete.trim())
 }
 
 fn delete_story_prompt() -> bool {
     println!("----------------------------");
     print!("Are you sure you want to delete this story? [Y/n]: ");
+    std::io::stdout().lock().flush().unwrap();
     let delete = get_user_input();
-    "Yy".contains(&delete.trim())
+    "Yy".contains(delete.trim())
 }
 
 fn update_status_prompt() -> Option<Status> {

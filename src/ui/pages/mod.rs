@@ -28,7 +28,7 @@ impl Page for HomePage {
 
         let db_state = self.db.database.read_db()?;
         for epic_id in db_state.epics.keys().sorted() {
-            let epic = db_state.epics.get(&epic_id).unwrap();
+            let epic = db_state.epics.get(epic_id).unwrap();
             println!(
                 "| {} | {} | {} |",
                 get_column_string(&epic_id.to_string(), 10),
@@ -97,7 +97,7 @@ impl Page for EpicDetail {
 
         let stories = &db_state.stories;
 
-        for story_id in (&stories).keys().sorted() {
+        for story_id in stories.keys().sorted() {
             let story = stories.get(story_id).unwrap();
             println!(
                 "| {} | {} | {} |",
@@ -134,7 +134,7 @@ impl Page for EpicDetail {
                     if db_state.get_story_by_id(&story_id).is_ok() {
                         Ok(Some(Action::NavigateToStoryDetail {
                             epic_id: self.epic_id,
-                            story_id: story_id
+                            story_id
                         }))
                     } else {
                         Ok(None)

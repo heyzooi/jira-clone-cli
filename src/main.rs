@@ -1,51 +1,52 @@
 use std::rc::Rc;
 
 mod models;
+
 mod db;
+use db::*;
+
 mod ui;
+
 mod io_utils;
+use io_utils::*;
+
 mod navigator;
+use navigator::*;
 
-use anyhow::Error;
-use ui::EpicDetail;
-use ui::HomePage;
-use db::JiraDatabase;
-use db::JSONFileDatabase;
-use ui::Page;
-use ui::StoryDetail;
+use anyhow::Result;
 
-fn main() -> Result<(), Error> {
-    let file_path = "data/db.json";
+fn main() -> Result<()> {
+    let db = Rc::new(JiraDatabase::new("data/db.json".to_owned()));
+    let mut navigator = Navigator::new(db);
+    
+    // 1. get current page from navigator. If there is no current page exit the loop.
+    while let Some(current_page) = navigator.get_current_page() {
+        clearscreen::clear().unwrap();
+        
+        // 2. render page
+        if let Err(error) = current_page.draw_page() {
+            println!("Error rendering page: {error}\nPress any key to continue...");
+            wait_for_key_press();
+            continue;
+        };
 
-    let home_page = HomePage {
-        db: Rc::new(JiraDatabase {
-            database: Box::new(JSONFileDatabase {
-                file_path: file_path.to_string(),
-            })
-        })
-    };
-    home_page.draw_page()?;
+        // 3. get user input
+        let user_input = get_user_input();
 
-    let epic_detail_page = EpicDetail {
-        epic_id: 1,
-        db: Rc::new(JiraDatabase {
-            database: Box::new(JSONFileDatabase {
-                file_path: file_path.to_string(),
-            })
-        })
-    };
-    epic_detail_page.draw_page()?;
+        // 4. pass input to page's input handler
+        let action_result = current_page.handle_input(&user_input);
+        if let Err(error) = action_result {
+            println!("Error handling input: {error}\nPress any key to continue...");
+            wait_for_key_press();
+            continue;
+        }
+        let action = action_result?;
 
-    let story_detail_page = StoryDetail {
-        epic_id: 1,
-        story_id: 2,
-        db: Rc::new(JiraDatabase {
-            database: Box::new(JSONFileDatabase {
-                file_path: file_path.to_string(),
-            })
-        })
-    };
-    story_detail_page.draw_page()?;
+        // 5. if the page's input handler returns an action let the navigator process the action
+        if let Some(action) = action {
+            navigator.handle_action(action)?;
+        }
+    }
 
     Ok(())
 }
